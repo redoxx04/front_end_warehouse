@@ -8,15 +8,14 @@ import { useTheme } from "@mui/material";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
 
 export default function ProductPage() {
   const TAX_RATE = 0.07;
@@ -27,25 +26,25 @@ export default function ProductPage() {
   function priceRow(qty, unit) {
     return qty * unit;
   }
-  
+
   function createRow(desc, qty, unit) {
     const price = priceRow(qty, unit);
     return { desc, qty, unit, price };
   }
-  
+
   function subtotal(items) {
     return items.map(({ price }) => price).reduce((sum, i) => sum + i, 0);
   }
-  
+
   const rows = [
-    createRow('Paperclips (Box)', 100, 1.15),
-    createRow('Paper (Case)', 10, 45.99),
-    createRow('Waste Basket', 2, 17.99),
+    createRow("Paperclips (Box)", 100, 1.15),
+    createRow("Paper (Case)", 10, 45.99),
+    createRow("Waste Basket", 2, 17.99),
   ];
 
   const invoiceSubtotal = subtotal(rows);
-const invoiceTaxes = TAX_RATE * invoiceSubtotal;
-const invoiceTotal = invoiceTaxes + invoiceSubtotal;
+  const invoiceTaxes = TAX_RATE * invoiceSubtotal;
+  const invoiceTotal = invoiceTaxes + invoiceSubtotal;
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const style = {
@@ -126,7 +125,16 @@ const invoiceTotal = invoiceTaxes + invoiceSubtotal;
           },
         }}
       >
-        <Button sx={{float:"right"}} variant={"contained"} onClick={handleOpen}><ShoppingCartIcon/></Button>
+        <div style={{width:"100%",position:'relative'}}>
+          <Button
+            variant={"contained"}
+            onClick={handleOpen}
+            sx={{ position: "absolute", right: "0" }}
+          >
+            <ShoppingCartIcon />
+          </Button>
+        </div>
+
         <DataGrid
           rows={mockDataProducts}
           columns={columns}
@@ -134,8 +142,9 @@ const invoiceTotal = invoiceTaxes + invoiceSubtotal;
         />
       </Box>
       <Modal
+        disable
         open={open}
-        onClose={handleClose}
+        // onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
@@ -144,48 +153,58 @@ const invoiceTotal = invoiceTaxes + invoiceSubtotal;
             Check Out
           </Typography>
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-          <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 700 }} aria-label="spanning table">
-        <TableHead>
-          <TableRow>
-            <TableCell align="center" colSpan={3}>
-              Details
-            </TableCell>
-            <TableCell align="right">Price</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Desc</TableCell>
-            <TableCell align="right">Qty.</TableCell>
-            <TableCell align="right">Unit</TableCell>
-            <TableCell align="right">Sum</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.desc}>
-              <TableCell>{row.desc}</TableCell>
-              <TableCell align="right">{row.qty}</TableCell>
-              <TableCell align="right">{row.unit}</TableCell>
-              <TableCell align="right">{ccyFormat(row.price)}</TableCell>
-            </TableRow>
-          ))}
-          <TableRow>
-            <TableCell rowSpan={3} />
-            <TableCell colSpan={2}>Subtotal</TableCell>
-            <TableCell align="right">{ccyFormat(invoiceSubtotal)}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Tax</TableCell>
-            <TableCell align="right">{`${(TAX_RATE * 100).toFixed(0)} %`}</TableCell>
-            <TableCell align="right">{ccyFormat(invoiceTaxes)}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell colSpan={2}>Total</TableCell>
-            <TableCell align="right">{ccyFormat(invoiceTotal)}</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </TableContainer>
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 700 }} aria-label="spanning table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell align="center" colSpan={3}>
+                      Details
+                    </TableCell>
+                    <TableCell align="right">Price</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Desc</TableCell>
+                    <TableCell align="right">Qty.</TableCell>
+                    <TableCell align="right">Unit</TableCell>
+                    <TableCell align="right">Sum</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rows.map((row) => (
+                    <TableRow key={row.desc}>
+                      <TableCell>{row.desc}</TableCell>
+                      <TableCell align="right">{row.qty}</TableCell>
+                      <TableCell align="right">{row.unit}</TableCell>
+                      <TableCell align="right">
+                        {ccyFormat(row.price)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  <TableRow>
+                    <TableCell rowSpan={3} />
+                    <TableCell colSpan={2}>Subtotal</TableCell>
+                    <TableCell align="right">
+                      {ccyFormat(invoiceSubtotal)}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Tax</TableCell>
+                    <TableCell align="right">{`${(TAX_RATE * 100).toFixed(
+                      0
+                    )} %`}</TableCell>
+                    <TableCell align="right">
+                      {ccyFormat(invoiceTaxes)}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={2}>Total</TableCell>
+                    <TableCell align="right">
+                      {ccyFormat(invoiceTotal)}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Typography>
         </Box>
       </Modal>
