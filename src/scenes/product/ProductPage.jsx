@@ -1,5 +1,5 @@
 import React from "react";
-import { Box } from "@mui/material";
+import { Box, Fab,Stack, TextField } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import { mockDataProducts } from "../../data/mockData";
@@ -16,10 +16,19 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import EditIcon from "@mui/icons-material/Edit";
+import { Formik } from "formik";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import * as yup from "yup";
 
 
 export default function ProductPage() {
   const TAX_RATE = 0.07;
+  const isNonMobile = useMediaQuery("(min-width:600px)");
+
+  const handleFormSubmit = (values) => {
+    console.log(values);
+  };
 
   function ccyFormat(num) {
     return `${num.toFixed(2)}`;
@@ -63,6 +72,27 @@ const invoiceTotal = invoiceTaxes + invoiceSubtotal;
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  const phoneRegExp =
+  /^((\+[1-9]{1,4}[ -]?)|(\([0-9]{2,3}\)[ -]?)|([0-9]{2,4})[ -]?)*?[0-9]{3,4}[ -]?[0-9]{3,4}$/;
+
+const checkoutSchema = yup.object().shape({
+  no_invoice: yup.string().required("required"),
+  asal_transaksi: yup.string().required("required"),
+  nama_invoice: yup.string().required("required"),
+  contact: yup
+    .string()
+    .matches(phoneRegExp, "Phone number is not valid")
+    .required("required"),
+  address1: yup.string().required("required"),
+});
+const initialValues = {
+  no_invoice: "",
+  asal_transaksi: "",
+  nama_invoice: "",
+  contact: "",
+  address1: "",
+};
+
   const columns = [
     { field: "id", headerName: "No", flex: 0.5 },
     { field: "sku", headerName: "SKU" },
@@ -88,6 +118,21 @@ const invoiceTotal = invoiceTaxes + invoiceSubtotal;
       field: "hargaModal",
       headerName: "Harga Modal",
       flex: 1,
+    },
+    {
+      field: "editProduk",
+      headerName: "Action",
+      flex: 1,
+      renderCell: (params) => (
+        <Stack direction={'row'} spacing={1}>
+          <Fab size="small" color={colors.greenAccent[100]}>
+            <EditIcon />
+          </Fab>
+          <Fab size="small" color={colors.greenAccent[100]}>
+            <ShoppingCartIcon />
+          </Fab>
+        </Stack>
+      ),
     },
   ];
 
@@ -144,20 +189,111 @@ const invoiceTotal = invoiceTaxes + invoiceSubtotal;
             Check Out
           </Typography>
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+          <Formik
+        onSubmit={handleFormSubmit}
+        initialValues={initialValues}
+        validationSchema={checkoutSchema}
+      >
+        {({
+          values,
+          errors,
+          touched,
+          handleBlur,
+          handleChange,
+          handleSubmit,
+        }) => (
+          <form onSubmit={handleSubmit}>
+            <Box
+              display="grid"
+              gap="30px"
+              gridTemplateColumns="repeat(4, minmax(0, 1fr))"
+              sx={{
+                "& > div": { gridColumn: isNonMobile ? undefined : "span 4" },
+              }}
+            >
+              <TextField
+                fullWidth
+                variant="filled"
+                type="text"
+                label="Nomor Invoice"
+                onBlur={handleBlur}
+                onChange={handleChange}
+                value={values.no_invoice}
+                name="no_invoice"
+                error={!!touched.no_invoice && !!errors.no_invoice}
+                helperText={touched.no_invoice && errors.no_invoice}
+                sx={{ gridColumn: "span 2" }}
+              />
+              <TextField
+                fullWidth
+                variant="filled"
+                type="text"
+                label="Asal Transaksi"
+                onBlur={handleBlur}
+                onChange={handleChange}
+                value={values.asal_transaksi}
+                name="asal_transaksi"
+                error={!!touched.asal_transaksi && !!errors.asal_transaksi}
+                helperText={touched.asal_transaksi && errors.asal_transaksi}
+                sx={{ gridColumn: "span 2" }}
+              />
+              <TextField
+                fullWidth
+                variant="filled"
+                type="text"
+                label="Nama Invoice"
+                onBlur={handleBlur}
+                onChange={handleChange}
+                value={values.nama_invoice}
+                name="nama_invoice"
+                error={!!touched.nama_invoice && !!errors.nama_invoice}
+                helperText={touched.nama_invoice && errors.nama_invoice}
+                sx={{ gridColumn: "span 2" }}
+              />
+              <TextField
+                fullWidth
+                variant="filled"
+                type="text"
+                label="Contact Number"
+                onBlur={handleBlur}
+                onChange={handleChange}
+                value={values.contact}
+                name="contact"
+                error={!!touched.contact && !!errors.contact}
+                helperText={touched.contact && errors.contact}
+                sx={{ gridColumn: "span 2" }}
+              />
+              <TextField
+                fullWidth
+                variant="filled"
+                type="text"
+                label="Address 1"
+                onBlur={handleBlur}
+                onChange={handleChange}
+                value={values.address1}
+                name="address1"
+                error={!!touched.address1 && !!errors.address1}
+                helperText={touched.address1 && errors.address1}
+                sx={{ gridColumn: "span 2" }}
+              />
+            </Box>
+            <Box display="flex" justifyContent="end" mt="20px">
+              <Button type="submit" color="secondary" variant="contained">
+                Create New User
+              </Button>
+            </Box>
+          </form>
+        )}
+      </Formik>
           <TableContainer component={Paper}>
       <Table sx={{ minWidth: 700 }} aria-label="spanning table">
         <TableHead>
           <TableRow>
-            <TableCell align="center" colSpan={3}>
-              Details
-            </TableCell>
-            <TableCell align="right">Price</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Desc</TableCell>
-            <TableCell align="right">Qty.</TableCell>
-            <TableCell align="right">Unit</TableCell>
-            <TableCell align="right">Sum</TableCell>
+            <TableCell>Nama Barang</TableCell>
+            <TableCell align="right">SKU</TableCell>
+            <TableCell align="right">Jumlah Barang</TableCell>
+            <TableCell align="right">Harga</TableCell>
+            {/* <TableCell align="right">Sum</TableCell> */}
           </TableRow>
         </TableHead>
         <TableBody>
