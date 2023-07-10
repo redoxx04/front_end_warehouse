@@ -6,10 +6,15 @@ import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettin
 import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
 import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
 import Header from "../../components/Header";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
-const Team = () => {
+const TeamPage = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  let user = window.localStorage.getItem("user");
+  user = JSON.parse(user);
   const columns = [
     { field: "id", headerName: "ID" },
     {
@@ -69,41 +74,49 @@ const Team = () => {
   ];
 
   return (
-    <Box m="20px">
-      <Header title="TEAM" subtitle="Managing the Team Members" />
-      <Box
-        m="40px 0 0 0"
-        height="75vh"
-        sx={{
-          "& .MuiDataGrid-root": {
-            border: "none",
-          },
-          "& .MuiDataGrid-cell": {
-            borderBottom: "none",
-          },
-          "& .name-column--cell": {
-            color: colors.greenAccent[300],
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: colors.blueAccent[700],
-            borderBottom: "none",
-          },
-          "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: colors.primary[400],
-          },
-          "& .MuiDataGrid-footerContainer": {
-            borderTop: "none",
-            backgroundColor: colors.blueAccent[700],
-          },
-          "& .MuiCheckbox-root": {
-            color: `${colors.greenAccent[200]} !important`,
-          },
-        }}
-      >
-        <DataGrid checkboxSelection rows={mockDataTeam} columns={columns} />
-      </Box>
-    </Box>
+    <>
+      {user?.role !== "admin" ? (
+          <h1 style={{  textAlign:'center' , minHeight:'80vh' ,display:'flex', alignItems:'center', justifyContent:'center', fontSize:'200px'}}>
+             404 Not Found
+          </h1>
+      ) : (
+        <Box m="20px">
+          <Header title="TEAM" subtitle="Managing the Team Members" />
+          <Box
+            m="40px 0 0 0"
+            height="75vh"
+            sx={{
+              "& .MuiDataGrid-root": {
+                border: "none",
+              },
+              "& .MuiDataGrid-cell": {
+                borderBottom: "none",
+              },
+              "& .name-column--cell": {
+                color: colors.greenAccent[300],
+              },
+              "& .MuiDataGrid-columnHeaders": {
+                backgroundColor: colors.blueAccent[700],
+                borderBottom: "none",
+              },
+              "& .MuiDataGrid-virtualScroller": {
+                backgroundColor: colors.primary[400],
+              },
+              "& .MuiDataGrid-footerContainer": {
+                borderTop: "none",
+                backgroundColor: colors.blueAccent[700],
+              },
+              "& .MuiCheckbox-root": {
+                color: `${colors.greenAccent[200]} !important`,
+              },
+            }}
+          >
+            <DataGrid checkboxSelection rows={mockDataTeam} columns={columns} />
+          </Box>
+        </Box>
+      )}
+    </>
   );
 };
 
-export default Team;
+export default TeamPage;

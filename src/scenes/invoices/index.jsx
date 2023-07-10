@@ -1,8 +1,11 @@
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box,  Typography, useTheme,Fab,Stack } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import { mockDataInvoices } from "../../data/mockData";
 import Header from "../../components/Header";
+import RemoveIcon from "@mui/icons-material/Remove";
+import EditIcon from "@mui/icons-material/Edit";
+import AddIcon from "@mui/icons-material/Add";
 
 const Invoices = () => {
   const theme = useTheme();
@@ -36,9 +39,19 @@ const Invoices = () => {
       ),
     },
     {
-      field: "date",
-      headerName: "Date",
+      field: "edit",
+      headerName: "Edit",
       flex: 1,
+      renderCell: (params) => (
+        <Stack direction={'row'} spacing={1}>
+          <Fab size="small" color={colors.greenAccent[100]}>
+            <RemoveIcon />
+          </Fab>
+          <Fab size="small" color={colors.greenAccent[100]}>
+            <AddIcon />
+          </Fab>
+        </Stack>
+      ),
     },
   ];
 
