@@ -36,25 +36,25 @@ export default function ProductPage() {
   function priceRow(qty, unit) {
     return qty * unit;
   }
-  
+
   function createRow(desc, qty, unit) {
     const price = priceRow(qty, unit);
     return { desc, qty, unit, price };
   }
-  
+
   function subtotal(items) {
     return items.map(({ price }) => price).reduce((sum, i) => sum + i, 0);
   }
-  
+
   const rows = [
-    createRow('Paperclips (Box)', 100, 1.15),
-    createRow('Paper (Case)', 10, 45.99),
-    createRow('Waste Basket', 2, 17.99),
+    createRow("Paperclips (Box)", 100, 1.15),
+    createRow("Paper (Case)", 10, 45.99),
+    createRow("Waste Basket", 2, 17.99),
   ];
 
   const invoiceSubtotal = subtotal(rows);
-const invoiceTaxes = TAX_RATE * invoiceSubtotal;
-const invoiceTotal = invoiceTaxes + invoiceSubtotal;
+  const invoiceTaxes = TAX_RATE * invoiceSubtotal;
+  const invoiceTotal = invoiceTaxes + invoiceSubtotal;
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const style = {
@@ -171,7 +171,16 @@ const initialValues = {
           },
         }}
       >
-        <Button sx={{float:"right"}} variant={"contained"} onClick={handleOpen}><ShoppingCartIcon/></Button>
+        <div style={{width:"100%",position:'relative'}}>
+          <Button
+            variant={"contained"}
+            onClick={handleOpen}
+            sx={{ position: "absolute", right: "0" }}
+          >
+            <ShoppingCartIcon />
+          </Button>
+        </div>
+
         <DataGrid
           rows={mockDataProducts}
           columns={columns}
@@ -179,8 +188,9 @@ const initialValues = {
         />
       </Box>
       <Modal
+        disable
         open={open}
-        onClose={handleClose}
+        // onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
@@ -323,6 +333,7 @@ const initialValues = {
       </Table>
     </TableContainer>
           </Typography>
+          
         </Box>
       </Modal>
     </Box>
