@@ -19,6 +19,7 @@ import Paper from '@mui/material/Paper';
 import EditIcon from "@mui/icons-material/Edit";
 import { Formik } from "formik";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import PublishIcon from '@mui/icons-material/Publish';
 import * as yup from "yup";
 
 
@@ -171,13 +172,20 @@ const initialValues = {
           },
         }}
       >
-        <div style={{width:"100%",position:'relative'}}>
+        <div style={{width:"100%",position:'relative', paddingBottom:'1rem'}}>
           <Button
             variant={"contained"}
             onClick={handleOpen}
-            sx={{ position: "absolute", right: "0" }}
+            sx={{ position: "absolute", right: "0", zIndex: "2" }}
           >
             <ShoppingCartIcon />
+          </Button>
+          <Button
+            variant={"contained"}
+            onClick={handleOpen}
+            sx={{ position: "absolute", right: "80px", zIndex: "2" }}
+          >
+            <PublishIcon />
           </Button>
         </div>
 
@@ -287,10 +295,14 @@ const initialValues = {
                 sx={{ gridColumn: "span 2" }}
               />
             </Box>
-            <Box display="flex" justifyContent="end" mt="20px">
+            <Box display="flex" justifyContent="end" mt="20px" spacing={1}>
+            <Button variant={"contained"} onClick={handleClose} color="secondary">
+            Cancel{" "}
+          </Button>  
               <Button type="submit" color="secondary" variant="contained">
-                Create New User
+                Create New Invoice
               </Button>
+              
             </Box>
           </form>
         )}
@@ -333,7 +345,6 @@ const initialValues = {
       </Table>
     </TableContainer>
           </Typography>
-          
         </Box>
       </Modal>
     </Box>
