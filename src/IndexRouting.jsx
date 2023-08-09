@@ -8,7 +8,7 @@ import TeamPage from "./scenes/team/TeamPage";
 import Dashboard from "./scenes/dashboard";
 import Invoices from "./scenes/invoices";
 import Contacts from "./scenes/contacts";
-import Form from "./scenes/form";
+import AddUserForm from "./scenes/form/AddUserForm";
 import FAQ from "./scenes/faq";
 import ProductPage from "./scenes/product/ProductPage";
 
@@ -24,7 +24,7 @@ export default function IndexRouting() {
           <Route path="team" element={<TeamPage />} />
           <Route path="contacts" element={<Contacts />} />
           <Route path="invoices" element={<Invoices />} />
-          <Route path="form" element={<Form />} />
+          <Route path="team/add" element={<AddUserForm />} />
           <Route path="faq" element={<FAQ />} />
           <Route path="product" element={<ProductPage />} />
         </Routes>

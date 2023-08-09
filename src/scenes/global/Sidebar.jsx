@@ -180,13 +180,7 @@ const Sidebar = () => {
             >
               Pages
             </Typography>
-            <Item
-              title="Form Add Employee"
-              to="/form"
-              icon={<PersonOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
+            
 
 
 
