@@ -124,12 +124,12 @@ const AddUserForm = () => {
                 renderValue={
                   values.id_role !== "" ? undefined : () => "Select Role"
                 }
-                name="id_role"
                 sx={{
                   ".MuiSelect-select": {
-                    padding: "1rem",
+                    padding: "0.7rem",
                   },
                 }}
+                name="id_role"
                 placeholder="Roles"
                 onChange={(e) => {
                   setFieldValue("id_role", e.target.value);

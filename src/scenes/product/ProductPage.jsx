@@ -47,6 +47,7 @@ export default function ProductPage() {
 
   const loadServerSideData = async (page, pageSize) => {
     setLoading(true);
+    console.log(page)
     try {
       const response = await axios.get("http://127.0.0.1:8000/api/products", {
         params: {
@@ -57,6 +58,7 @@ export default function ProductPage() {
       setProduct(response.data.data);
       setPagination({
         ...pagination,
+        pageSize:pageSize,page:page,
         rowCount: response.data.total,
       });
     } catch (error) {
@@ -137,7 +139,7 @@ export default function ProductPage() {
   };
 
   const columns = [
-    { field: "id_produk", headerName: "No", flex: 0.5 },
+    { field: "id", headerName: "No", flex: 0.5 },
     { field: "kode_produk", headerName: "Kode Produk" },
     {
       field: "nama_kategori",
@@ -277,18 +279,17 @@ export default function ProductPage() {
           </Button>
         </div>
         <ModalComponent isOpen={isModalOpen} handleClose={handleCloseModal}>
-          {/* {console.log("Current active modal:", activeModal)}
-          {activeModal === "ADD_PRODUCT" && <AddProductForm />} */}
           <AddProductForm/>
         </ModalComponent>
         <DataGrid
-          getRowId={(row) => row.id_produk}
-          rows={product}
+          // getRowId={(row) => row.id_produk}
+          rows={product.map((item,index)=>({id:index+1,...item}))}
           columns={columns}
           pageSize={pagination.pageSize}
           rowCount={pagination.rowCount}
           pagination
-          rowsPerPageOptions={""}
+          rowsPerPageOptions={[10,25,100]}
+          onPageSizeChange={(data)=>{loadServerSideData(0,data);console.log(data)}}
           paginationMode="server"
           onPageChange={handlePageChange}
           loading={loading}
