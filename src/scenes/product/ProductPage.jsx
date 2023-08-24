@@ -2,35 +2,26 @@ import React, { useEffect, useState } from "react";
 import { Box, Fab, Stack, TextField } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
-import { mockDataProducts } from "../../data/mockData";
 import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
 import Button from "@mui/material/Button";
 import ModalComponent from "../modal/ModalComponent";
 import AddProductForm from "../form/AddProductForm";
-import Typography from "@mui/material/Typography";
-import Modal from "@mui/material/Modal";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
 import EditIcon from "@mui/icons-material/Edit";
-import { Formik } from "formik";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import PublishIcon from "@mui/icons-material/Publish";
 import axios from "axios";
-import * as yup from "yup";
+import CheckOutForm from "../form/CheckOutForm";
+import UploadProductForm from "../form/UploadProductForm";
 
 export default function ProductPage() {
   const [product, setProduct] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [activeModal, setActiveModal] = useState('');
+  const [activeModal, setActiveModal] = useState("");
   const [isModalOpen, setModalOpen] = useState(false);
+  const [isModalUploadOpen, setModalUploadOpen] = useState(false);
+  const [isModalCheckOutOpen, setModalCheckOutOpen] = useState(false);
   const [pagination, setPagination] = useState({
     pageSize: 100,
     page: 1,
@@ -40,14 +31,25 @@ export default function ProductPage() {
     loadServerSideData(pagination.page - 1, pagination.pageSize); // Load initial data
   }, []);
 
+  const addToCart = async (id_produk) => {
+    const params = {
+      id_produk: id_produk,
+      id_user: "2",
+      jumlah_produk_invoice: 1,
+    };
+    try {
+      await axios.post("http://127.0.0.1:8000/api/cart/add", params); // adjust the API endpoint
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const handlePageChange = (params) => {
-    console.log(params);
     loadServerSideData(params, pagination.pageSize);
   };
 
   const loadServerSideData = async (page, pageSize) => {
     setLoading(true);
-    console.log(page)
     try {
       const response = await axios.get("http://127.0.0.1:8000/api/products", {
         params: {
@@ -58,7 +60,8 @@ export default function ProductPage() {
       setProduct(response.data.data);
       setPagination({
         ...pagination,
-        pageSize:pageSize,page:page,
+        pageSize: pageSize,
+        page: page,
         rowCount: response.data.total,
       });
     } catch (error) {
@@ -67,8 +70,6 @@ export default function ProductPage() {
       setLoading(false);
     }
   };
-  const TAX_RATE = 0.07;
-  const isNonMobile = useMediaQuery("(min-width:600px)");
 
   const handleFormSubmit = (values) => {
     console.log(values);
@@ -97,46 +98,12 @@ export default function ProductPage() {
   ];
 
   const invoiceSubtotal = subtotal(rows);
-  const invoiceTaxes = TAX_RATE * invoiceSubtotal;
-  const invoiceTotal = invoiceTaxes + invoiceSubtotal;
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const style = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: "90%",
-    bgcolor: "background.paper",
-    border: "2px solid #000",
-    boxShadow: 24,
-    p: 4,
-  };
 
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-
-  const phoneRegExp =
-    /^((\+[1-9]{1,4}[ -]?)|(\([0-9]{2,3}\)[ -]?)|([0-9]{2,4})[ -]?)*?[0-9]{3,4}[ -]?[0-9]{3,4}$/;
-
-  const checkoutSchema = yup.object().shape({
-    no_invoice: yup.string().required("required"),
-    asal_transaksi: yup.string().required("required"),
-    nama_invoice: yup.string().required("required"),
-    contact: yup
-      .string()
-      .matches(phoneRegExp, "Phone number is not valid")
-      .required("required"),
-    address1: yup.string().required("required"),
-  });
-  const initialValues = {
-    no_invoice: "",
-    asal_transaksi: "",
-    nama_invoice: "",
-    contact: "",
-    address1: "",
-  };
 
   const columns = [
     { field: "id", headerName: "No", flex: 0.5 },
@@ -199,8 +166,12 @@ export default function ProductPage() {
           <Fab size="small" color={colors.greenAccent[100]}>
             <EditIcon />
           </Fab>
-          <Fab size="small" color={colors.greenAccent[100]}>
-            <ShoppingCartIcon />
+          <Fab
+            size="small"
+            color={colors.greenAccent[100]}
+            onClick={() => addToCart(params.row.id_produk)}
+          >
+            <ShoppingCartIcon /> {params.row.id_produk}
           </Fab>
         </Stack>
       ),
@@ -209,13 +180,27 @@ export default function ProductPage() {
 
   const handleAddProductOpen = () => {
     console.log("Add product button clicked!");
-    setActiveModal("ADD_PRODUCT");
+    // setActiveModal("ADD_PRODUCT");
     setModalOpen(true);
+  };
+
+  const handleUploadProductOpen = () => {
+    console.log("Upload product button clicked!");
+    // setActiveModal("ADD_PRODUCT");
+    setModalUploadOpen(true);
+  };
+
+  const handleCheckOutOpen = () => {
+    console.log("Cart button clicked!");
+    // setActiveModal("CART_CHECKOUT");
+    setModalCheckOutOpen(true);
   };
 
   const handleCloseModal = () => {
     setActiveModal(null);
     setModalOpen(false);
+    setModalCheckOutOpen(false);
+    setModalUploadOpen(false);
   };
 
   return (
@@ -258,14 +243,14 @@ export default function ProductPage() {
         >
           <Button
             variant={"contained"}
-            onClick={handleOpen}
+            onClick={handleCheckOutOpen}
             sx={{ position: "absolute", right: "0", zIndex: "2" }}
           >
             <ShoppingCartIcon />
           </Button>
           <Button
             variant={"contained"}
-            onClick={handleOpen}
+            onClick={handleUploadProductOpen}
             sx={{ position: "absolute", right: "80px", zIndex: "2" }}
           >
             <PublishIcon />
@@ -279,17 +264,31 @@ export default function ProductPage() {
           </Button>
         </div>
         <ModalComponent isOpen={isModalOpen} handleClose={handleCloseModal}>
-          <AddProductForm/>
+          <AddProductForm />
+        </ModalComponent>
+        <ModalComponent
+          isOpen={isModalCheckOutOpen}
+          handleClose={handleCloseModal}
+        >
+          <CheckOutForm />
+        </ModalComponent>
+        <ModalComponent
+          isOpen={isModalUploadOpen}
+          handleClose={handleCloseModal}
+        >
+          <UploadProductForm />
         </ModalComponent>
         <DataGrid
           // getRowId={(row) => row.id_produk}
-          rows={product.map((item,index)=>({id:index+1,...item}))}
+          rows={product.map((item, index) => ({ id: index + 1, ...item }))}
           columns={columns}
           pageSize={pagination.pageSize}
           rowCount={pagination.rowCount}
           pagination
-          rowsPerPageOptions={[10,25,100]}
-          onPageSizeChange={(data)=>{loadServerSideData(0,data);console.log(data)}}
+          rowsPerPageOptions={[10, 25, 100]}
+          onPageSizeChange={(data) => {
+            loadServerSideData(0, data);
+          }}
           paginationMode="server"
           onPageChange={handlePageChange}
           loading={loading}

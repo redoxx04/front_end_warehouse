@@ -12,14 +12,17 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/Header";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const AddUserForm = () => {
   const isNonMobile = useMediaQuery("(min-width:600px)");
+  const Navigate = useNavigate(); 
 
   const handleFormSubmit = async (values) => {
     console.log(values);
     try {
       await axios.post("http://127.0.0.1:8000/api/users", values);
+      Navigate('/team');
     } catch (e) {
       console.log(e);
     }

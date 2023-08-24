@@ -5,6 +5,7 @@ import {
   Select,
   MenuItem,
   InputLabel,
+  FormControl,
 } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
@@ -12,12 +13,38 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/Header";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import ModalComponent from "../modal/ModalComponent";
+import AddCategoryForm from "./AddCategoryForm";
 
 const AddProductForm = () => {
   const [kodeProduk, setKodeProduk] = useState();
   const [kategoriProduk, setKategoriProduk] = useState();
   const [subKategoriProduk, setSubKategoriProduk] = useState();
+  const dropDown_height = 48;
+  const dropDown_padding_top = 8;
+  const [isModalKategoriOpen, setModalKategoriOpen] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
   const isNonMobile = useMediaQuery("(min-width:600px)");
+
+  const DropdownListProps = {
+    PaperProps: {
+      style: {
+        maxHeight: dropDown_height * 3.5 + dropDown_padding_top,
+        width: 100,
+      },
+    },
+  };
+
+  const handleAddKategori = () => {
+    // setActiveModal("ADD_PRODUCT");
+    setModalKategoriOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    // setActiveModal(null);
+    setModalOpen(false);
+    setModalKategoriOpen(false);
+  };
 
   const handleFormSubmit = async (values) => {
     console.log(values);
@@ -123,89 +150,108 @@ const AddProductForm = () => {
                 error={!!touched.kode_produk && !!errors.kode_produk}
                 helperText={touched.kode_produk && errors.kode_produk}
               />
-              <Select
-                fullWidth
-                variant="filled"
-                displayEmpty
-                value={values.kategori}
-                name="kategori"
-                placeholder="Kategori"
-                onChange={(e, child) => {
-                  handleChange(e);
-                  setKategoriProduk({
-                    id: child.props.id,
-                    value: e.target.value,
-                  });
-                  setFieldValue(
-                    "SKU_produk",
-                    `${kodeProduk ? kodeProduk : ""}-${e.target.value}-${
-                      subKategoriProduk?.value ? subKategoriProduk?.value : ""
-                    }`
-                  );
-                }}
-                onBlur={handleBlur}
-                renderValue={
-                  values.kategori !== "" ? undefined : () => "Select Category"
-                }
-                sx={{
-                  ".MuiSelect-select": {
-                    padding: "0.7rem",
-                  },
-                }}
-              >
-                {categories.map((category) => (
-                  <MenuItem
-                    id={category.id_kategori}
-                    key={category.id_kategori}
-                    value={category.kode_kategori}
+              <FormControl>
+                <Select
+                  fullWidth
+                  variant="filled"
+                  displayEmpty
+                  value={values.kategori}
+                  name="kategori"
+                  placeholder="Kategori"
+                  onChange={(e, child) => {
+                    handleChange(e);
+                    setKategoriProduk({
+                      id: child.props.id,
+                      value: e.target.value,
+                    });
+                    setFieldValue(
+                      "SKU_produk",
+                      `${kodeProduk ? kodeProduk : ""}-${e.target.value}-${
+                        subKategoriProduk?.value ? subKategoriProduk?.value : ""
+                      }`
+                    );
+                  }}
+                  onBlur={handleBlur}
+                  renderValue={
+                    values.kategori !== "" ? undefined : () => "Select Category"
+                  }
+                  MenuProps={DropdownListProps}
+                  inputProps={{ "aria-label": "Without label" }}
+                  sx={{
+                    ".MuiSelect-select": {
+                      padding: "0.7rem",
+                    },
+                  }}
+                >
+                  {categories.map((category) => (
+                    <MenuItem
+                      id={category.id_kategori}
+                      key={category.id_kategori}
+                      value={category.kode_kategori}
+                    >
+                      {category.nama_kategori}
+                    </MenuItem>
+                  ))}
+                    <div>
+                  <button onClick={handleAddKategori}>Add New Category</button>
+                    </div>
+                    <ModalComponent
+                    isOpen={isModalKategoriOpen}
+                    handleClose={handleCloseModal}
+                    width={400}
                   >
-                    {category.nama_kategori}
-                  </MenuItem>
-                ))}
-              </Select>
-              <Select
-                disabled={!kategoriProduk}
-                fullWidth
-                variant="filled"
-                displayEmpty
-                value={values.id_sub_kategori}
-                name="id_sub_kategori"
-                placeholder="Sub Kategori"
-                onChange={(e, child) => {
-                  handleChange(e);
-                  setSubKategoriProduk({
-                    id: e.target.value,
-                    value: child.props.id,
-                  });
-                  setFieldValue(
-                    "SKU_produk",
-                    `${kodeProduk ? kodeProduk : ""}-${
-                      kategoriProduk?.value ? kategoriProduk?.value : ""
-                    }-${child.props.id}`
-                  );
-                }}
-                onBlur={handleBlur}
-                renderValue={
-                  values.id_sub_kategori !== ""
-                    ? undefined
-                    : () => "Select Sub Category"
-                }
-                sx={{
-                  ".MuiSelect-select": {
-                    padding: "0.7rem",
-                  },
-                }}
-              >
-                {subCategories.map((subCategory) => (
-                  <MenuItem
-                    key={subCategory.id_sub_kategori}
-                    id={subCategory.kode_sub_kategori}
-                    value={subCategory.id_sub_kategori}
-                  >
-                    {subCategory.nama_sub_kategori}
-                  </MenuItem>
-                ))}
-              </Select>
+                    <AddCategoryForm />
+                  </ModalComponent>
+                  
+                </Select>
+              </FormControl>
+              <FormControl>
+                <Select
+                  disabled={!kategoriProduk}
+                  fullWidth
+                  variant="filled"
+                  displayEmpty
+                  value={values.id_sub_kategori}
+                  name="id_sub_kategori"
+                  placeholder="Sub Kategori"
+                  onChange={(e, child) => {
+                    handleChange(e);
+                    setSubKategoriProduk({
+                      id: e.target.value,
+                      value: child.props.id,
+                    });
+                    setFieldValue(
+                      "SKU_produk",
+                      `${kodeProduk ? kodeProduk : ""}-${
+                        kategoriProduk?.value ? kategoriProduk?.value : ""
+                      }-${child.props.id}`
+                    );
+                  }}
+                  onBlur={handleBlur}
+                  renderValue={
+                    values.id_sub_kategori !== ""
+                      ? undefined
+                      : () => "Select Sub Category"
+                  }
+                  MenuProps={DropdownListProps}
+                  inputProps={{ "aria-label": "Without label" }}
+                  sx={{
+                    ".MuiSelect-select": {
+                      padding: "0.7rem",
+                    },
+                  }}
+                >
+                  {subCategories.map((subCategory) => (
+                    <MenuItem
+                      key={subCategory.id_sub_kategori}
+                      id={subCategory.kode_sub_kategori}
+                      value={subCategory.id_sub_kategori}
+                    >
+                      {subCategory.nama_sub_kategori}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               <TextField
                 fullWidth
                 variant="filled"

@@ -20,7 +20,7 @@ export default function IndexRouting() {
       <main className="content">
         <Topbar setIsSidebar={setIsSidebar} />
         <Routes>
-          <Route path="" element={<Dashboard />} />
+          <Route path="" element={<ProductPage />} />
           <Route path="team" element={<TeamPage />} />
           <Route path="contacts" element={<Contacts />} />
           <Route path="invoices" element={<Invoices />} />
