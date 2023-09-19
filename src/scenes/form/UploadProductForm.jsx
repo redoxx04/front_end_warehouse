@@ -6,7 +6,7 @@ import PublishIcon from "@mui/icons-material/Publish";
 import DownloadIcon from '@mui/icons-material/Download';
 import * as Yup from "yup";
 
-export default function UploadProductForm() {
+export default function UploadProductForm({loadData, handleCloseModalParent}) {
   const handleFormSubmit = async (values) => {
     console.log(values);
     const formData = new FormData();
@@ -18,6 +18,9 @@ export default function UploadProductForm() {
       ); // adjust the API endpoint
     } catch (e) {
       console.log(e);
+    } finally {
+      loadData();
+      handleCloseModalParent();
     }
   };
 
@@ -69,10 +72,12 @@ export default function UploadProductForm() {
             <Button type="submit" color="secondary" variant="contained">
               <PublishIcon />
             </Button>
+            <a href="/assets/Template Add Product Bulk.csv" download>
             <Button type="button" color="primary" variant="contained">
               Download Template CSV
               <DownloadIcon />
             </Button>
+            </a>
           </form>
         )}
       </Formik>

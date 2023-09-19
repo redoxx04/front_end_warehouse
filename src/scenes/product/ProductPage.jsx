@@ -11,16 +11,20 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import EditIcon from "@mui/icons-material/Edit";
 import PublishIcon from "@mui/icons-material/Publish";
+import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
 import CheckOutForm from "../form/CheckOutForm";
 import UploadProductForm from "../form/UploadProductForm";
+import { useSearchParams } from "react-router-dom";
 
 export default function ProductPage() {
   const [product, setProduct] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [activeModal, setActiveModal] = useState("");
   const [isModalOpen, setModalOpen] = useState(false);
   const [isModalUploadOpen, setModalUploadOpen] = useState(false);
+  const user = JSON.parse(localStorage.getItem("user")).user;
   const [isModalCheckOutOpen, setModalCheckOutOpen] = useState(false);
   const [pagination, setPagination] = useState({
     pageSize: 100,
@@ -31,10 +35,17 @@ export default function ProductPage() {
     loadServerSideData(pagination.page - 1, pagination.pageSize); // Load initial data
   }, []);
 
-  const addToCart = async (id_produk) => {
+  useEffect(() => {
+    const id = searchParams.get("id");
+    if (id) {
+      setModalOpen(true);
+    }
+  }, [searchParams]);
+
+  const addToCart = async (id_produk, id_user = user?.id_user) => {
     const params = {
       id_produk: id_produk,
-      id_user: "2",
+      id_user: id_user,
       jumlah_produk_invoice: 1,
     };
     try {
@@ -43,12 +54,20 @@ export default function ProductPage() {
       console.log(e);
     }
   };
+  const handleEditItem = (id) => {
+    searchParams.delete("id");
+    searchParams.append("id", id);
+    setSearchParams(searchParams);
+  };
 
   const handlePageChange = (params) => {
     loadServerSideData(params, pagination.pageSize);
   };
 
-  const loadServerSideData = async (page, pageSize) => {
+  const loadServerSideData = async (
+    page = pagination?.page,
+    pageSize = pagination?.pageSize
+  ) => {
     setLoading(true);
     try {
       const response = await axios.get("http://127.0.0.1:8000/api/products", {
@@ -71,31 +90,23 @@ export default function ProductPage() {
     }
   };
 
-  const handleFormSubmit = (values) => {
-    console.log(values);
+  const handleDeleteProduct = async (id_produk) => {
+    try {
+      const response = await axios.delete(
+        `http://127.0.0.1:8000/api/products/${id_produk}`
+      );
+      console.log(response.data.message); // Should print "Product deleted successfully"
+      loadServerSideData(); // Refresh the grid data
+    } catch (error) {
+      console.error("An error occurred while deleting the product:", error);
+    }
   };
-
-  function ccyFormat(num) {
-    return `${num.toFixed(2)}`;
-  }
-  function priceRow(qty, unit) {
-    return qty * unit;
-  }
-
-  function createRow(desc, qty, unit) {
-    const price = priceRow(qty, unit);
-    return { desc, qty, unit, price };
-  }
 
   function subtotal(items) {
     return items.map(({ price }) => price).reduce((sum, i) => sum + i, 0);
   }
 
-  const rows = [
-    createRow("Paperclips (Box)", 100, 1.15),
-    createRow("Paper (Case)", 10, 45.99),
-    createRow("Waste Basket", 2, 17.99),
-  ];
+  const rows = [];
 
   const invoiceSubtotal = subtotal(rows);
   const theme = useTheme();
@@ -163,7 +174,11 @@ export default function ProductPage() {
       flex: 1,
       renderCell: (params) => (
         <Stack direction={"row"} spacing={1}>
-          <Fab size="small" color={colors.greenAccent[100]}>
+          <Fab
+            size="small"
+            onClick={() => handleEditItem(params.row.id_produk)}
+            color={colors.greenAccent[100]}
+          >
             <EditIcon />
           </Fab>
           <Fab
@@ -171,7 +186,10 @@ export default function ProductPage() {
             color={colors.greenAccent[100]}
             onClick={() => addToCart(params.row.id_produk)}
           >
-            <ShoppingCartIcon /> {params.row.id_produk}
+            <ShoppingCartIcon />
+          </Fab>
+          <Fab size="small" color={colors.greenAccent[100]}  onClick={() => handleDeleteProduct(params.row.id_produk)}>
+            <DeleteIcon /> {}
           </Fab>
         </Stack>
       ),
@@ -264,19 +282,25 @@ export default function ProductPage() {
           </Button>
         </div>
         <ModalComponent isOpen={isModalOpen} handleClose={handleCloseModal}>
-          <AddProductForm />
+          <AddProductForm
+            loadData={() => loadServerSideData()}
+            handleCloseModalParent={handleCloseModal}
+          />
         </ModalComponent>
         <ModalComponent
           isOpen={isModalCheckOutOpen}
           handleClose={handleCloseModal}
         >
-          <CheckOutForm />
+          <CheckOutForm loadData={() => loadServerSideData()} handleCloseModalParent={handleCloseModal}/>
         </ModalComponent>
         <ModalComponent
           isOpen={isModalUploadOpen}
           handleClose={handleCloseModal}
         >
-          <UploadProductForm />
+          <UploadProductForm
+            loadData={() => loadServerSideData()}
+            handleCloseModalParent={handleCloseModal}
+          />
         </ModalComponent>
         <DataGrid
           // getRowId={(row) => row.id_produk}

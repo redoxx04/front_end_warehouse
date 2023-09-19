@@ -7,6 +7,7 @@ import {
   InputLabel,
 } from "@mui/material";
 import { Formik } from "formik";
+import React from "react";
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/Header";
@@ -16,13 +17,14 @@ import { useNavigate } from "react-router-dom";
 
 const AddUserForm = () => {
   const isNonMobile = useMediaQuery("(min-width:600px)");
-  const Navigate = useNavigate(); 
+  const Navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user")).user;
 
   const handleFormSubmit = async (values) => {
     console.log(values);
     try {
       await axios.post("http://127.0.0.1:8000/api/users", values);
-      Navigate('/team');
+      Navigate("/team");
     } catch (e) {
       console.log(e);
     }
@@ -140,11 +142,14 @@ const AddUserForm = () => {
                 }}
                 onBlur={handleBlur}
               >
-                {roles.map((role) => (
-                  <MenuItem key={role.id_role} value={role.id_role}>
-                    {role.nama_role}
-                  </MenuItem>
-                ))}
+                {roles.map((role) => {
+                  const shouldRender =
+                    user?.role?.id_role !== 2 || role?.id_role === 3;
+
+                  return shouldRender ? (
+                    <MenuItem key={role.id_role} value={role.id_role}>{role.nama_role}</MenuItem>
+                  ) : null;
+                })}
               </Select>
             </Box>
             <Box display="flex" justifyContent="end" mt="20px">

@@ -13,7 +13,7 @@ import Header from "../../components/Header";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const AddCategoryForm = () => {
+const AddCategoryForm = ({loadCategoryData, handleCloseCategoryFormModal}) => {
   const isNonMobile = useMediaQuery("(min-width:600px)");
 
   const handleFormSubmit = async (values) => {
@@ -22,6 +22,10 @@ const AddCategoryForm = () => {
       await axios.post("http://127.0.0.1:8000/api/kategoris", values);
     } catch (e) {
       console.log(e);
+    }
+    finally{
+      loadCategoryData()
+      handleCloseCategoryFormModal()
     }
   };
 

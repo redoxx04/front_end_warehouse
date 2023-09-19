@@ -4,6 +4,7 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import LoginPage from "./scenes/Login/LoginPage";
 import IndexRouting from "./IndexRouting";
+import ProtectedRoute from "./ProtectedRoute";
 // import Bar from "./scenes/bar";
 // import Line from "./scenes/line";
 // import Pie from "./scenes/pie";
@@ -19,7 +20,11 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Routes>
-          <Route path="/*" element={<IndexRouting />} />
+          <Route path="/*" element={
+            <ProtectedRoute children={ <IndexRouting />}/>
+              
+         
+          } />
           <Route
             path="/login"
             element={

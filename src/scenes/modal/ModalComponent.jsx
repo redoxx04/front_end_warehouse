@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Box, Modal } from "@mui/material";
+import { useSearchParams } from "react-router-dom";
 
 const ModalComponent = ({ isOpen, handleClose, children, width = 800 }) => {
   const style = {
@@ -13,9 +14,15 @@ const ModalComponent = ({ isOpen, handleClose, children, width = 800 }) => {
     boxShadow: 24,
     p: 4,
   };
+  const [searchParams, setSearchParams] = useSearchParams();
 
   return (
+
     <Modal
+    onBackdropClick={()=>{
+      searchParams.delete('id')
+      setSearchParams(searchParams)
+    }}
       open={isOpen}
       onClose={handleClose}
       aria-labelledby="modal-modal-title"

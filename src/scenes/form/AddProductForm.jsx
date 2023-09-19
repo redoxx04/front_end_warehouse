@@ -11,20 +11,43 @@ import { Formik } from "formik";
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/Header";
-import { useEffect, useState } from "react";
+import { useEffect, useState ,useMemo} from "react";
 import axios from "axios";
 import ModalComponent from "../modal/ModalComponent";
 import AddCategoryForm from "./AddCategoryForm";
+import AddSubCategoryForm from "./AddSubCategoryForm";
+import { useSearchParams } from "react-router-dom";
 
-const AddProductForm = () => {
+const AddProductForm = ({ loadData, handleCloseModalParent }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const id = searchParams.get("id");
+  const [productData, setProductData] = useState(null);
+
   const [kodeProduk, setKodeProduk] = useState();
   const [kategoriProduk, setKategoriProduk] = useState();
   const [subKategoriProduk, setSubKategoriProduk] = useState();
   const dropDown_height = 48;
   const dropDown_padding_top = 8;
   const [isModalKategoriOpen, setModalKategoriOpen] = useState(false);
+  const [isModalSubKategoriOpen, setModalSubKategoriOpen] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const isNonMobile = useMediaQuery("(min-width:600px)");
+
+  useEffect(() => {
+    if (id) {
+      fetchProductData(id);
+    }
+  }, [id]);
+  const fetchProductData = async (productId) => {
+    try {
+      const response = await axios.get(
+        `http://127.0.0.1:8000/api/products/${productId}`
+      );
+      setProductData(response.data);
+    } catch (error) {
+      console.error("Failed to fetch product data:", error);
+    }
+  };
 
   const DropdownListProps = {
     PaperProps: {
@@ -40,22 +63,37 @@ const AddProductForm = () => {
     setModalKategoriOpen(true);
   };
 
+  const handleAddSubKategori = () => {
+    setModalSubKategoriOpen(true);
+  };
+
   const handleCloseModal = () => {
     // setActiveModal(null);
     setModalOpen(false);
     setModalKategoriOpen(false);
+    setModalSubKategoriOpen(false);
   };
 
   const handleFormSubmit = async (values) => {
     console.log(values);
     const params = {
       ...values,
-      SKU_produk: `${kodeProduk}-${kategoriProduk?.value}-${subKategoriProduk?.value}`,
+      SKU_produk: id
+        ? productData?.SKU_produk
+        : `${kodeProduk}-${kategoriProduk?.value}-${subKategoriProduk?.value}`,
     };
     try {
-      await axios.post("http://127.0.0.1:8000/api/products", params); // adjust the API endpoint
+      id
+        ? await axios.put(`http://127.0.0.1:8000/api/products/${id}`, params)
+        : await axios.post(`http://127.0.0.1:8000/api/products`, params);
+      // await axios.post(`http://127.0.0.1:8000/api/products`, params); // adjust the API endpoint
     } catch (e) {
       console.log(e);
+    } finally {
+      searchParams.delete("id");
+      setSearchParams(searchParams);
+      loadData();
+      handleCloseModalParent();
     }
   };
 
@@ -81,6 +119,10 @@ const AddProductForm = () => {
     } catch (error) {
       console.error("Failed to fetch categories:", error);
     }
+    // finally {
+    //   // loadCategoryData();
+    //   handleCloseModal();
+    // }
   };
 
   // Fetch subcategories
@@ -100,6 +142,63 @@ const AddProductForm = () => {
     }
   };
 
+  const [initialValues, setInitialValues] = useState({
+    kode_produk: "",
+    kategori: "",
+    id_sub_kategori: "",
+    harga_produk: "",
+    harga_modal: "",
+    jumlah_produk: "",
+    SKU_produk: "--",
+  });
+
+  useEffect(() => {
+    if (productData) {
+      setInitialValues((prev) => {
+        return {
+          ...prev,
+          kode_produk: productData?.kode_produk,
+          kategori: productData?.sub_kategori.kategori.nama_kategori,
+          id_sub_kategori: productData?.id_sub_kategori,
+          harga_produk: productData?.harga_produk,
+          harga_modal: productData?.harga_modal,
+          jumlah_produk: productData?.jumlah_produk,
+          SKU_produk: productData?.SKU_produk,
+          nama_produk: productData?.nama_produk,
+        };
+      });
+      // Set other state variables if needed
+      setKodeProduk(productData?.kode_produk);
+      setKategoriProduk({
+        id: productData?.sub_kategori.kategori.id_produk,
+        value: productData?.sub_kategori.kategori.kode_produk,
+      });
+      setSubKategoriProduk(productData?.id_sub_kategori);
+    }
+  }, [productData]);
+
+  const RenderSubCatForm = useMemo(()=>{
+    console.log(kategoriProduk)
+    return(
+      <AddSubCategoryForm
+      idCategory={kategoriProduk?.id}
+      loadSubCategoryData={fetchSubCategories}
+      handleCloseSubCategoryFormModal={handleCloseModal}
+    />
+    )
+  },[kategoriProduk])
+  console.log(kategoriProduk);
+
+  const RenderCategoryForm = useMemo(()=>{
+    console.log(kategoriProduk)
+    return(
+      <AddCategoryForm
+      loadCategoryData={fetchCategories}
+      handleCloseCategoryFormModal={handleCloseModal}
+    />
+    )
+  })
+
   return (
     <Box m="20px">
       <Header title="CREATE PRODUCT" subtitle="Create a New Product" />
@@ -108,6 +207,7 @@ const AddProductForm = () => {
         onSubmit={handleFormSubmit}
         initialValues={initialValues}
         validationSchema={productSchema}
+        enableReinitialize
       >
         {({
           values,
@@ -119,6 +219,7 @@ const AddProductForm = () => {
           setFieldValue,
         }) => (
           <form onSubmit={handleSubmit}>
+            {console.log(errors)}
             <Box
               display="grid"
               gap="30px"
@@ -192,17 +293,11 @@ const AddProductForm = () => {
                       {category.nama_kategori}
                     </MenuItem>
                   ))}
-                    <div>
-                  <button onClick={handleAddKategori}>Add New Category</button>
-                    </div>
-                    <ModalComponent
-                    isOpen={isModalKategoriOpen}
-                    handleClose={handleCloseModal}
-                    width={400}
-                  >
-                    <AddCategoryForm />
-                  </ModalComponent>
-                  
+                  <div>
+                    <button onClick={handleAddKategori}>
+                      Add New Category
+                    </button>
+                  </div>
                 </Select>
               </FormControl>
               <FormControl>
@@ -250,6 +345,11 @@ const AddProductForm = () => {
                       {subCategory.nama_sub_kategori}
                     </MenuItem>
                   ))}
+                  <div>
+                    <button onClick={handleAddSubKategori}>
+                      Add New Sub Category
+                    </button>
+                  </div>
                 </Select>
               </FormControl>
               <TextField
@@ -322,6 +422,20 @@ const AddProductForm = () => {
           </form>
         )}
       </Formik>
+      <ModalComponent
+        isOpen={isModalKategoriOpen}
+        handleClose={handleCloseModal}
+        width={400}
+      >
+        {RenderCategoryForm}
+      </ModalComponent>
+      <ModalComponent
+        isOpen={isModalSubKategoriOpen}
+        handleClose={handleCloseModal}
+        width={400}
+      >
+      {RenderSubCatForm}
+      </ModalComponent>
     </Box>
   );
 };
@@ -335,15 +449,5 @@ const productSchema = yup.object().shape({
   jumlah_produk: yup.number().required("required"),
   SKU_produk: yup.string(),
 });
-
-const initialValues = {
-  kode_produk: "",
-  kategori: "",
-  id_sub_kategori: "",
-  harga_produk: "",
-  harga_modal: "",
-  jumlah_produk: "",
-  SKU_produk: "--",
-};
 
 export default AddProductForm;

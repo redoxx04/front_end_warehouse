@@ -1,9 +1,12 @@
 import * as React from "react";
+import  { useEffect } from "react";
+
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import axios from "axios";
 import Checkbox from "@mui/material/Checkbox";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
@@ -15,6 +18,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useTheme } from "@emotion/react";
 import { tokens } from "../../theme";
 import { green } from "@mui/material/colors";
+import { useNavigate } from "react-router-dom";
 
 function Copyright(props) {
   return (
@@ -26,7 +30,7 @@ function Copyright(props) {
     >
       {"Copyright © "}
       <Link color="inherit" href="https://mui.com/">
-        Warehouse
+        PT CENTLE BUANA INDONESIA
       </Link>{" "}
       {new Date().getFullYear()}
       {"."}
@@ -39,13 +43,31 @@ function Copyright(props) {
 export default function LoginPage() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const handleSubmit = (event) => {
+  const navigate = useNavigate()
+  useEffect(()=>{
+   const token= localStorage.getItem('token')
+    if(token){
+      navigate('/')
+
+    }
+  },[])
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+    const params={
+      username:data?.get('username'),
+      password:data?.get('password')
+    }
+    try {
+      const res = await axios.post("http://127.0.0.1:8000/api/login", params); // adjust the API endpoint
+      console.log(res)
+      localStorage.setItem('token',res?.data?.access_token)
+      localStorage.setItem('user',JSON.stringify(res?.data))
+      navigate('/')
+      
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
@@ -103,10 +125,10 @@ export default function LoginPage() {
               },
             }]}
           />
-          <FormControlLabel
+          {/* <FormControlLabel
             control={<Checkbox value="remember" color="secondary" />}
             label="Remember me"
-          />
+          /> */}
           <Button
             type="submit"
             fullWidth

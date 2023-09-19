@@ -9,7 +9,7 @@ import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
 import ReceiptOutlinedIcon from "@mui/icons-material/ReceiptOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import InventoryIcon from '@mui/icons-material/Inventory';
+import InventoryIcon from "@mui/icons-material/Inventory";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 // import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 // import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
@@ -36,24 +36,21 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
   );
 };
 
-const Sidebar = () => {
+const Sidebar = ({ isSidebar, setIsSidebar }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("Dashboard");
-  const myObject = {
-    name : "john doe",
-    role:'admin'
-  }
-  
-  window.localStorage.setItem("user", JSON.stringify(myObject));
-  let user = window.localStorage.getItem("user");
-  user = JSON.parse(user)
+  const user = JSON.parse(localStorage.getItem("user")).user;
   console.log(user);
 
   return (
     <Box
       sx={{
+        position: "fixed",
+        top: 0,
+        bottom: 0,
+        left: 0,
+
         "& .pro-sidebar-inner": {
           background: `${colors.primary[400]} !important`,
         },
@@ -71,35 +68,40 @@ const Sidebar = () => {
         },
       }}
     >
-      <ProSidebar collapsed={isCollapsed}>
+      <ProSidebar style={{}} collapsed={isSidebar}>
         <Menu iconShape="square">
           {/* LOGO AND MENU ICON */}
           <MenuItem
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
+            onClick={() => setIsSidebar(!isSidebar)}
+            icon={isSidebar ? <MenuOutlinedIcon /> : undefined}
             style={{
               margin: "10px 0 20px 0",
               color: colors.grey[100],
             }}
           >
-            {!isCollapsed && (
+            {!isSidebar && (
               <Box
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
                 ml="15px"
               >
-                <Typography variant="h3" color={colors.grey[100]}>
-                  Warehouse
-                </Typography>
-                <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
+                <Box textAlign="center">
+                  <Typography variant="h3" color={colors.grey[100]}>
+                    Warehouse
+                  </Typography>
+                  <Typography variant="h4" color={colors.grey[100]}>
+                    Centle Buana Indonesia
+                  </Typography>
+                </Box>
+                <IconButton onClick={() => setIsSidebar(!isSidebar)}>
                   <MenuOutlinedIcon />
                 </IconButton>
               </Box>
             )}
           </MenuItem>
 
-          {!isCollapsed && (
+          {!isSidebar && (
             <Box mb="25px">
               <Box display="flex" justifyContent="center" alignItems="center">
                 <img
@@ -117,16 +119,16 @@ const Sidebar = () => {
                   fontWeight="bold"
                   sx={{ m: "10px 0 0 0" }}
                 >
-                  Lorem Ipsum
+                  {user.username}
                 </Typography>
                 <Typography variant="h5" color={colors.greenAccent[500]}>
-                  Owner
+                  {user?.role?.nama_role}
                 </Typography>
               </Box>
             </Box>
           )}
 
-          <Box paddingLeft={isCollapsed ? undefined : "10%"}>
+          <Box paddingLeft={isSidebar ? undefined : "10%"}>
             {/* <Item
               title="Dashboard"
               to="/"
@@ -142,7 +144,23 @@ const Sidebar = () => {
             >
               Data
             </Typography>
-            {/* {user?.role === "admin" && ( */}
+            <>
+              <Item
+                title="Log Invoices"
+                to="/invoices"
+                icon={<ReceiptOutlinedIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+              <Item
+                title="Product"
+                to="/product"
+                icon={<InventoryIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+            </>
+            {user?.role?.id_role !== 3 && (
               <Item
                 title="Manage Team"
                 to="/team"
@@ -150,39 +168,16 @@ const Sidebar = () => {
                 selected={selected}
                 setSelected={setSelected}
               />
-            {/* )} */}
-            <Item
-              title="Contacts Information"
-              to="/contacts"
-              icon={<ContactsOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="Invoices Balances"
-              to="/invoices"
-              icon={<ReceiptOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="Product"
-              to="/product"
-              icon={<InventoryIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
+            )}
 
-            <Typography
+            {/* <Typography
               variant="h6"
               color={colors.grey[300]}
               sx={{ m: "15px 0 5px 20px" }}
             >
               Pages
             </Typography>
-            
-
-
+             */}
 
             {/* <Item
               title="Calendar"

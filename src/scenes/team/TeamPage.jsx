@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 const TeamPage = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const userConfig = JSON.parse(localStorage.getItem("user")).user;
 
   const [user, setUser] = useState([]);
   useEffect(() => {
@@ -84,6 +85,8 @@ const TeamPage = () => {
 
   return (
     <>
+    {userConfig?.role?.id_role !== 3 ?(
+
       <Box m="20px">
         <Header title="TEAM" subtitle="Managing the Team Members" />
         <Stack direction={"row"} justifyContent={"end"}>
@@ -137,6 +140,20 @@ const TeamPage = () => {
           />
         </Box>
       </Box>
+    ):
+    (
+      <Box sx={{  
+        // minHeight:'100%',
+        display:'flex',
+        alignItems:'center',
+        paddingTop:'40vh',
+        justifyContent:'center'
+      }}>
+      <h1>
+        404 Error Not Found
+      </h1>
+      </Box>
+    )}
     </>
   );
 };

@@ -12,15 +12,23 @@ import {
   import { useEffect, useState } from "react";
   import axios from "axios";
   
-  const AddSubCategoryForm = () => {
+  const AddSubCategoryForm = ({loadSubCategoryData, handleCloseSubCategoryFormModal,idCategory}) => {
     const isNonMobile = useMediaQuery("(min-width:600px)");
   
     const handleFormSubmit = async (values) => {
-      console.log(values);
+      const params={
+        ...values,
+        id_kategori:idCategory
+      }
+      console.log(params);
       try {
-        await axios.post("http://127.0.0.1:8000/api/sub_kategoris", values);
+        await axios.post("http://127.0.0.1:8000/api/sub_kategoris", params);
       } catch (e) {
         console.log(e);
+      }
+      finally {
+        loadSubCategoryData()
+        handleCloseSubCategoryFormModal()
       }
     };
   
@@ -81,7 +89,7 @@ import {
               </Box>
               <Box display="flex" justifyContent="end" mt="20px">
                 <Button type="submit" color="secondary" variant="contained">
-                  Create New Category
+                  Create New Sub Category
                 </Button>
               </Box>
             </form>

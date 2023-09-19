@@ -12,24 +12,28 @@ import {
   TableBody,
   useMediaQuery,
   TableFooter,
+  IconButton,
 } from "@mui/material";
 import { Formik } from "formik";
 import React, { useEffect, useState } from "react";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 import axios from "axios";
 import * as yup from "yup";
 
-const CheckOutForm = ({ handleClose }) => {
+const CheckOutForm = ({ loadData, handleCloseModalParent }) => {
   const [cart, setCart] = useState([]);
   const [total, setTotal] = useState([]);
   const [loading, setLoading] = useState(false);
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const TAX_RATE = 0.1;
+  const user = JSON.parse(localStorage.getItem("user")).user;
 
   const loadCartServerSideData = async (id_user) => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://127.0.0.1:8000/api/user/${2}/cart`,
+        `http://127.0.0.1:8000/api/user/${id_user}/cart`,
         {}
       );
       setCart(response.data);
@@ -42,7 +46,7 @@ const CheckOutForm = ({ handleClose }) => {
   };
 
   useEffect(() => {
-    loadCartServerSideData();
+    loadCartServerSideData(user?.id_user);
   }, []);
 
   const handleFormSubmit = async (values) => {
@@ -57,7 +61,7 @@ const CheckOutForm = ({ handleClose }) => {
 
     const params = {
       ...values,
-      id_user: 2,
+      id_user: user?.id_user,
       total_transaksi: total_transaksi,
       cart: transformedCart,
     };
@@ -67,6 +71,9 @@ const CheckOutForm = ({ handleClose }) => {
       await axios.post("http://127.0.0.1:8000/api/checkout", params); // adjust the API endpoint
     } catch (e) {
       console.log(e);
+    } finally {
+      loadData();
+      handleCloseModalParent();
     }
   };
 
@@ -75,6 +82,24 @@ const CheckOutForm = ({ handleClose }) => {
       .map((d) => d.products.harga_produk * d.jumlah_produk_invoice)
       .reduce((sum, i) => sum + i, 0);
   }
+
+  const handleEditProduct = async (action, id_cart, jumlah_produk_invoice) => {
+    let temp = jumlah_produk_invoice;
+    if (action == "+") {
+      temp++;
+    } else {
+      temp--;
+    }
+    try {
+      await axios.put(`http://127.0.0.1:8000/api/cart/${id_cart}`, {
+        jumlah_produk_invoice: temp,
+      });
+    } catch (e) {
+      console.log(e);
+    } finally {
+      loadCartServerSideData(user?.id_user);
+    }
+  };
 
   const invoiceSubtotal = subtotal(cart);
   const invoiceTaxes = TAX_RATE * invoiceSubtotal;
@@ -189,15 +214,6 @@ const CheckOutForm = ({ handleClose }) => {
                   maxHeight: "30rem",
                   marginTop: "2rem",
                   position: "relative",
-                  // "&::after": {
-                  //   content: "''",
-                  //   position: "absolute",
-                  //   top: "-1px",
-                  //   height: "2px",
-                  //   zIndex: 5,
-                  //   background: (theme) => theme.palette.primary.main,
-                  //   width: "100%",
-                  // },
                 }}
                 component={Paper}
               >
@@ -229,7 +245,29 @@ const CheckOutForm = ({ handleClose }) => {
                           {data.products.SKU_produk}
                         </TableCell>
                         <TableCell align="right">
+                          <IconButton
+                            onClick={() =>
+                              handleEditProduct(
+                                "-",
+                                data?.id_cart,
+                                data?.jumlah_produk_invoice
+                              )
+                            }
+                          >
+                            <RemoveIcon />
+                          </IconButton>
                           {data.jumlah_produk_invoice}
+                          <IconButton
+                            onClick={() =>
+                              handleEditProduct(
+                                "+",
+                                data?.id_cart,
+                                data?.jumlah_produk_invoice
+                              )
+                            }
+                          >
+                            <AddIcon />
+                          </IconButton>
                         </TableCell>
                         <TableCell align="right">
                           {ccyFormat(
@@ -277,7 +315,7 @@ const CheckOutForm = ({ handleClose }) => {
               <Box display="flex" justifyContent="end" mt="20px" spacing={1}>
                 <Button
                   variant={"contained"}
-                  onClick={handleClose}
+                  onClick={handleCloseModalParent}
                   color="secondary"
                 >
                   Cancel{" "}
