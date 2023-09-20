@@ -91,7 +91,6 @@ const Sidebar = ({ isSidebar, setIsSidebar }) => {
                     Warehouse
                   </Typography>
                   <Typography variant="h4" color={colors.grey[100]}>
-                    Centle Buana Indonesia
                   </Typography>
                 </Box>
                 <IconButton onClick={() => setIsSidebar(!isSidebar)}>

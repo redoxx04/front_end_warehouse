@@ -30,7 +30,7 @@ function Copyright(props) {
     >
       {"Copyright © "}
       <Link color="inherit" href="https://mui.com/">
-        PT CENTLE BUANA INDONESIA
+        PT Warehouse
       </Link>{" "}
       {new Date().getFullYear()}
       {"."}
